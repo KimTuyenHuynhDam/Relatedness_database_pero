@@ -47,15 +47,14 @@ clean_ids <- function(df, columns) {
 
 # Read and clean data
 pero <- read.xlsx("./data/Peromyscus.xlsx", detectDates = TRUE) %>% 
-  filter(! STOCK == "EPL") %>% 
-  dplyr::select(1:5) %>% distinct() %>% 
+   dplyr::select(1:5) %>% distinct() %>% 
   clean_column_names() %>% 
   mutate(Birthday = as.Date(Birthday, origin = "1899-12-30"), # Excel's date origin
          BirthMonth = month(Birthday),
          BirthYear = year(Birthday)) %>% filter (BirthYear <= 2024)
 
+
 matingcage <- read.xlsx("./data/Mating Records.xlsx") %>%
-  filter(! STOCK == "EPL") %>% 
   dplyr::select(1:5) %>% distinct() %>% 
   clean_column_names() %>%
   mutate(DateofMating = as.Date(DateofMating, origin = "1899-12-30"))
