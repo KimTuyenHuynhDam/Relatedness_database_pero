@@ -48,7 +48,7 @@ clean_ids <- function(df, columns) {
 # Read and clean data
 pero <- read.xlsx("./data/Peromyscus.xlsx", detectDates = TRUE) %>% 
   filter(! STOCK == "EPL") %>% 
-  select(1:5) %>% distinct() %>% 
+  dplyr::select(1:5) %>% distinct() %>% 
   clean_column_names() %>% 
   mutate(Birthday = as.Date(Birthday, origin = "1899-12-30"), # Excel's date origin
          BirthMonth = month(Birthday),
@@ -56,7 +56,7 @@ pero <- read.xlsx("./data/Peromyscus.xlsx", detectDates = TRUE) %>%
 
 matingcage <- read.xlsx("./data/Mating Records.xlsx") %>%
   filter(! STOCK == "EPL") %>% 
-  select(1:5) %>% distinct() %>% 
+  dplyr::select(1:5) %>% distinct() %>% 
   clean_column_names() %>%
   mutate(DateofMating = as.Date(DateofMating, origin = "1899-12-30"))
 
@@ -93,7 +93,7 @@ for (species in all_stock) {
                     str_replace_all("[^[:alnum:]]", ""))) 
   
   common_cols <- setdiff(intersect(names(DAMSIRE_ori), names(IND_ori)), "MatingNumber")
-  DAMSIRE <- DAMSIRE_ori %>% select(-all_of(common_cols))
+  DAMSIRE <- DAMSIRE_ori %>% dplyr::select(-all_of(common_cols))
   
   # Remove IDs starting with "0" then change to then end "0000" in both datasets
   IND <- clean_ids(IND_ori, c("ID"))
@@ -118,7 +118,7 @@ for (species in all_stock) {
     for (i in 1:max_generations) {
       new_ancestors <- ped_data %>%
         filter(ID %in% ancestors) %>%
-        select(Dam, Sire) %>%
+        dplyr::select(Dam, Sire) %>%
         unlist() %>%
         na.omit() %>%
         unique()
@@ -143,7 +143,7 @@ for (species in all_stock) {
       mating_pair <- DAMSIRE %>% filter(MatingNumber == mating_number)
       
       if (nrow(mating_pair) > 0) {
-        StartingAnimalsOfInterest <- as_vector(mating_pair %>% select(Dam, Sire))
+        StartingAnimalsOfInterest <- as_vector(mating_pair %>% dplyr::select(Dam, Sire))
         
         dam_id <- mating_pair$Dam
         sire_id <- mating_pair$Sire
@@ -257,11 +257,11 @@ for (species in all_stock) {
            BirthYear = year(Birthday))
   
   dam_info <- merged_df %>%
-    select(ID, Birthday, BirthMonth, BirthYear) %>%
+    dplyr::select(ID, Birthday, BirthMonth, BirthYear) %>%
     rename(Birthday_Dam = Birthday, BirthMonth_Dam = BirthMonth, BirthYear_Dam = BirthYear)
   
   sire_info <- merged_df %>%
-    select(ID, Birthday, BirthMonth, BirthYear) %>%
+    dplyr::select(ID, Birthday, BirthMonth, BirthYear) %>%
     rename(Birthday_Sire = Birthday, BirthMonth_Sire = BirthMonth, BirthYear_Sire = BirthYear)
   
   merged_df2 <- merged_df %>%  
@@ -289,7 +289,7 @@ for (species in all_stock) {
   
   # Merge average litter size to relatedness score
   mating_info <- results_df %>% 
-    select(MatingNumber, Relatedness) %>%
+    dplyr::select(MatingNumber, Relatedness) %>%
     right_join(DAMSIRE_ori, by = 'MatingNumber') %>%
     left_join(litter_stats, by = 'MatingNumber') %>% 
     distinct() %>% 
@@ -303,7 +303,7 @@ for (species in all_stock) {
   mating_info <- mating_info %>%
     mutate(max_litters_per_year = ifelse(species == 'IS', 365.25 / 28, 365.25 / 23)) %>%
     filter(number_of_litters_per_year <= max_litters_per_year) %>%
-    select(-max_litters_per_year) %>%  # Remove the temporary max_litters_per_year column
+    dplyr::select(-max_litters_per_year) %>%  # Remove the temporary max_litters_per_year column
     filter(!is.na(Relatedness)) %>% 
     distinct() %>% 
     filter(Relatedness > 0)
@@ -414,12 +414,12 @@ for (species in all_stock) {
   
   # Prepare data for combined plotting
   relatedness_data <- mating_info %>%
-    select(Year, Relatedness_norm) %>%
+    dplyr::select(Year, Relatedness_norm) %>%
     rename(Value = Relatedness_norm) %>%
     mutate(Type = "Relatedness")
   
   litter_size_data <- mating_info %>%
-    select(Year, avg_litter_size_norm) %>%
+    dplyr::select(Year, avg_litter_size_norm) %>%
     rename(Value = avg_litter_size_norm) %>%
     mutate(Type = "Average Litter Size")
   
