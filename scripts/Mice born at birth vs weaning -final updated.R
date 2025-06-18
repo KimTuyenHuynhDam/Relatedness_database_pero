@@ -362,12 +362,21 @@ for (species in all_stock) {
   
   cat("Number of breeding pairs removed: ", removed_count, "\n")
   
-  # Prepare data for export
+  
+  #Calculate number of recorded births from final breeding pairs
+  birth_count <- data %>%
+    filter(`Mating Number` %in% final_breeding_pairs) %>% distinct() %>%
+    nrow()
+  
+  cat("Total number of recorded births from final breeding pairs: ", birth_count, "\n")
+  
+  # Prepare summary data for export
   breeding_summary <- data.frame(
-    "Description" = c("Initial Breeding Pairs", "Final Breeding Pairs", "Removed Breeding Pairs"),
-    "Count" = c(initial_count, final_count, removed_count),
-    "Removed Pairs (if any)" = c(NA, NA, paste(removed_pairs, collapse = ", "))
+    "Description" = c("Initial Breeding Pairs", "Final Breeding Pairs", "Removed Breeding Pairs", "Total Birth Records from Final Pairs"),
+    "Count" = c(initial_count, final_count, removed_count, birth_count),
+    "Removed Pairs (if any)" = c(NA, NA, paste(removed_pairs, collapse = ", "), NA)
   )
+  
   
   # Write to Excel
   write.xlsx(breeding_summary, "./database/Breeding_Pairs_Summary.xlsx")
@@ -838,7 +847,7 @@ for (species in all_stock) {
   #########################################
   ###################
   
-  # Summarize data by gender and calculate necessary metrics
+  # Summarize data by Sex and calculate necessary metrics
   gender_loss_ratios <- data %>%
     group_by(`Mating Number`) %>%
     summarise(
@@ -877,7 +886,7 @@ for (species in all_stock) {
         Pearson_P = numeric(),
         McFadden_R2 = numeric(),
         McFadden_P = numeric(),
-        Gender = character()
+        Sex = character()
       )
       
       for (year in seq(min_year, max_year)) {
@@ -918,7 +927,7 @@ for (species in all_stock) {
               Pearson_P = cor_test$p.value,
               McFadden_R2 = mcfadden_r2,
               McFadden_P = mcfadden_p_value,
-              Gender = gender_label
+              Sex = gender_label
             )
           )
         }
@@ -944,38 +953,38 @@ for (species in all_stock) {
   )
   
   # Plot the four plots
-  pearson_plot <- ggplot(continuous_correlations_gender, aes(x = Year, y = Pearson_R, color = Gender)) +
+  pearson_plot <- ggplot(continuous_correlations_gender, aes(x = Year, y = Pearson_R, color = Sex)) +
     geom_line(size = 1) +
     labs(
       y = "Pearson R",
-      title = "Pearson R by Gender Over Time"
+      title = "Pearson R by Sex Over Time"
     ) +
     theme_minimal()
   
-  pearson_p_plot <- ggplot(continuous_correlations_gender, aes(x = Year, y = -log10(Pearson_P), color = Gender)) +
+  pearson_p_plot <- ggplot(continuous_correlations_gender, aes(x = Year, y = -log10(Pearson_P), color = Sex)) +
     geom_line(size = 1) +
     geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "red") +
     labs(
       y = "-log10(Pearson P-value)",
-      title = "Pearson P-value by Gender Over Time"
+      title = "Pearson P-value by Sex Over Time"
     ) +
     theme_minimal()
   
   
-  mcfadden_plot <- ggplot(continuous_correlations_gender, aes(x = Year, y = McFadden_R2, color = Gender)) +
+  mcfadden_plot <- ggplot(continuous_correlations_gender, aes(x = Year, y = McFadden_R2, color = Sex)) +
     geom_line(size = 1) +
     labs(
       y = "McFadden's R²",
-      title = "McFadden's R² by Gender Over Time"
+      title = "McFadden's R² by Sex Over Time"
     ) +
     theme_minimal()
   
-  mcfadden_p_plot <- ggplot(continuous_correlations_gender, aes(x = Year, y = -log10(McFadden_P), color = Gender)) +
+  mcfadden_p_plot <- ggplot(continuous_correlations_gender, aes(x = Year, y = -log10(McFadden_P), color = Sex)) +
     geom_line(size = 1) +
     geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "red") +
     labs(
       y = "-log10(McFadden P-value)",
-      title = "McFadden P-value by Gender Over Time"
+      title = "McFadden P-value by Sex Over Time"
     ) +
     theme_minimal()
   
@@ -991,11 +1000,11 @@ for (species in all_stock) {
   )
   
   # Add a title to the whole plot
-  title <- ggdraw() + draw_label("Gender-Based Loss Ratio Analysis Over Time", fontface = 'bold', size = 15)
+  title <- ggdraw() + draw_label("Sex-Based Loss Ratio Analysis Over Time", fontface = 'bold', size = 15)
   combined_final_plot <- plot_grid(title, final_plot, ncol = 1, rel_heights = c(0.1, 1))
   
   # Save the final plot
-  ggsave("./database/Gender_Based_Loss_Ratio_Analysis_Over_Time_Stacked.jpeg", plot = combined_final_plot, width = 10, height = 14)
+  ggsave("./database/Sex_Based_Loss_Ratio_Analysis_Over_Time_Stacked.jpeg", plot = combined_final_plot, width = 10, height = 14)
   
   # Display the final plot
   print(combined_final_plot)
